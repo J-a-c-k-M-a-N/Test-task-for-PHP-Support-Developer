@@ -1,0 +1,62 @@
+version: "3.1"
+
+services:
+
+    webserver-one:
+        image: nginx:stable-alpine
+        container_name: test-webserver-one
+        working_dir: /var/www/app/public/views
+        ports:
+            - "80:80"
+        volumes:
+            - ./appOne/docker/nginx:/etc/nginx/conf.d
+
+            - ./appOne/docker/logs/nginx-access.log:/var/log/nginx/access.log
+            - ./appOne/docker/logs/nginx-error.log:/var/log/nginx/error.log
+
+            - ./appOne/views:/var/www/app/public/views
+
+    app-one:
+        build: ./appOne/docker/php-fpm
+        container_name: test-app-one
+        working_dir: /var/www/app/public
+        volumes:
+            - ./appOne:/var/www/app/public
+
+    webserver-two:
+        image: nginx:stable-alpine
+        container_name: test-webserver-two
+        working_dir: /var/www/app/public
+        ports:
+            - "8080:80"
+        volumes:
+            - ./appTwo/docker/nginx:/etc/nginx/conf.d
+
+            - ./appTwo/docker/logs/nginx-access.log:/var/log/nginx/access.log
+            - ./appTwo/docker/logs/nginx-error.log:/var/log/nginx/error.log
+
+            - ./appTwo:/var/www/app/public
+
+    app-two:
+        build: ./appTwo/docker/php-fpm
+        container_name: test-app-two
+        working_dir: /var/www/app/public
+        volumes:
+            - ./appTwo:/var/www/app/public
+
+    db:
+        image: postgres:11
+        container_name: test-pgsql
+        restart: always
+        environment:
+            POSTGRES_USER: test
+            POSTGRES_PASSWORD: test
+        volumes:
+            - ${DB_PATH_HOST}:${DB_PATH_CONTAINER}
+
+    adminer:
+        image: adminer
+        container_name: test-adminer
+        restart: always
+        ports:
+            - ${DB_PORT}:8080
