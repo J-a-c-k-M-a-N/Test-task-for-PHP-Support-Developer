@@ -52,11 +52,11 @@ services:
             POSTGRES_USER: test
             POSTGRES_PASSWORD: test
         volumes:
-            - ${DB_PATH_HOST}:${DB_PATH_CONTAINER}
+            - ./database:/var/lib/postgresql/data
 
     adminer:
         image: adminer
         container_name: test-adminer
         restart: always
         ports:
-            - ${DB_PORT}:8080
+            - 6080:8080
